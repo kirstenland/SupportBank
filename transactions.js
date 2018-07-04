@@ -1,12 +1,12 @@
 const moment = require("moment");
 
 class Transaction {
-    constructor(data) {
-        this.date = moment(data[0], "DD-MM-YYYY");
-        this.from = data[1];
-        this.to = data[2];
-        this.narrative = data[3];
-        this.amount = parseFloat(data[4]);
+    constructor(date, from, to, narrative, amount) {
+        this.date = date;
+        this.from = from;
+        this.to = to;
+        this.narrative = narrative;
+        this.amount = parseFloat(amount);
     }
 
     printSelf() {

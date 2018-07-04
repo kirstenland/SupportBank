@@ -17,7 +17,7 @@ log4js.configure({
 
 const logger = log4js.getLogger("index.js");
 
-logger.info("Program has started.")
+logger.info("Program has started.");
 
 fs.readFile("DodgyTransactions2015.csv", 'utf8',  function (err, data) {
     try {
@@ -34,9 +34,7 @@ fs.readFile("DodgyTransactions2015.csv", 'utf8',  function (err, data) {
 });
 
 function processData(data) {
-     let rows = data.split("\n");
-     rows.shift();
-     rows.pop();
+    //removed code which converts data into rows
      const errors = countErrors(rows);
 
      if (errors.size !== 0) {
