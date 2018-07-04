@@ -15,6 +15,11 @@ class Account {
         this.total -= transaction.amount;
         this.transactionsFrom.push(transaction);
     }
+
+    printNameAndTotal(){
+        console.log("Name: " + this.owner);
+        console.log("Total: " + this.total);
+    }
 }
 
 module.exports = Account;
