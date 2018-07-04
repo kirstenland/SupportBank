@@ -6,6 +6,11 @@ class Transaction {
         this.narrative = data[3];
         this.amount = parseFloat(data[4]);
     }
+
+    printSelf() {
+        console.log("Date: "+this.date);
+        console.log("Narrative: " + this.narrative + "\n");
+    }
 }
 
 module.exports = Transaction;

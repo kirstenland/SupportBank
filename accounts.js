@@ -20,6 +20,14 @@ class Account {
         console.log("Name: " + this.owner);
         console.log("Total: " + this.total);
     }
+
+    printTransactions(){
+        this.printNameAndTotal();
+        console.log("\nTransactions out: ");
+        this.transactionsFrom.forEach(function(transaction) {transaction.printSelf();});
+        console.log("Transactions in: ");
+        this.transactionsTo.forEach(function(transaction) {transaction.printSelf();});
+    }
 }
 
 module.exports = Account;
