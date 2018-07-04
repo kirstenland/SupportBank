@@ -20,8 +20,17 @@ const logger = log4js.getLogger("index.js");
 logger.info("Program has started.")
 
 fs.readFile("DodgyTransactions2015.csv", 'utf8',  function (err, data) {
-    const accounts = processData(data);
-    userInstruction(accounts);
+    try {
+        const accounts = processData(data);
+        userInstruction(accounts);
+    } catch (e){
+        if (e === "Stop Process") {
+            console.log("Goodbye");
+        } else {
+            console.log("An unknown error has occured");
+            console.log(e);
+        }
+    }
 });
 
 function processData(data) {
@@ -30,29 +39,56 @@ function processData(data) {
      rows.shift();
      rows.pop();
 
-     for (let i = 0; i < rows.length; i++){
-        let row = rows[i];
-        let trans = row.split(",")
+     const errors = new Map();
 
-        if (trans.length != 5) {
-            logger.error(`Wrong number of columns in row ${i}: should be 5 columns but there are ${trans.length}.`);
-        }
-        if (isNaN(trans[4])) {
-            logger.error(`Amount in row ${i} is not a number: ${trans[4]}`);
-        }
-        if (!moment(trans[0], "DD-MM-YYYY").isValid()) {
-            logger.error(`Date in row ${i} is not valid: ${trans[0]}`);
-        }
+     for (let i = 0; i < rows.length; i++) {
+         let row = rows[i];
+         let trans = row.split(",")
+         let errorMessage = "";
 
-        let transaction = new Transaction(trans);
-        //console.log(transaction);
-        checkAndAddAccount(transaction.from, accounts);
-        checkAndAddAccount(transaction.to, accounts);
-        (accounts.get(transaction.to)).processToTransaction(transaction);
-        (accounts.get(transaction.from)).processFromTransaction(transaction);
-    };
-    //console.log(accounts);
+         if (trans.length != 5) {
+             logger.error(`Wrong number of columns in row ${i}: should be 5 columns but there are ${trans.length}.`);
+             errorMessage += `Wrong number of columns in row ${i}: should be 5 columns but there are ${trans.length}.\n`
+         } else {
+             if (isNaN(trans[4])) {
+                 logger.error(`Amount in row ${i} is not a number: ${trans[4]}`);
+                 errorMessage += `Amount in row ${i} is not a number: ${trans[4]}\n`;
+             }
+             if (!moment(trans[0], "DD-MM-YYYY").isValid()) {
+                 logger.error(`Date in row ${i} is not valid: ${trans[0]}`);
+                 errorMessage += `Date in row ${i} is not valid: ${trans[0]}\n`;
+             }
+         }
+         if (errorMessage !== "") {
+             errors.set(i, errorMessage);
+         }
+     }
+
+     if (errors.size !== 0) {
+         printErrors(errors);
+         const query = readlineSync.question("Do you want to continue anyway with the remaining data? (y/N)");
+         if (query.toUpperCase() !== "Y") {
+             throw "Stop Process"
+         }
+     }
+     for (let i = 0; i < rows.length; i++) {
+         if (!errors.has(i)) {
+             let row = rows[i];
+             let trans = row.split(",")
+             let transaction = new Transaction(trans);
+             checkAndAddAccount(transaction.from, accounts);
+             checkAndAddAccount(transaction.to, accounts);
+             (accounts.get(transaction.to)).processToTransaction(transaction);
+             (accounts.get(transaction.from)).processFromTransaction(transaction);
+         }
+     }
     return accounts;
+}
+
+function printErrors(errors) {
+    errors.forEach(function(error) {
+        console.log(error)
+    })
 }
 
 function userInstruction(accounts) {
