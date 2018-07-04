@@ -5,20 +5,7 @@ const Transaction = require('./transactions.js');
 
 fs.readFile("Transactions2014.csv", 'utf8',  function (err, data) {
     const accounts = processData(data);
-    let command = readlineSync.question("Enter command:");
-    if (command.toUpperCase() === "LIST ALL") {                                                                
-        //console.log(accounts);
-        accounts.forEach(function(account) {account.printNameAndTotal()});
-        console.log("Note negative total is owed")                                                             
-    } else if ((command.slice(0,4)).toUpperCase() === "LIST") {
-        let name = command.slice(5);
-        if (accounts.has(name)) {
-            (accounts.get(name)).printTransactions();
-        } else {
-            console.log("account name not recognised");
-        }
-    } else {console.log("Command not recognised")}                                                             
-    
+    userInstruction(accounts);
 });
 
 function processData(data) {
@@ -39,6 +26,23 @@ function processData(data) {
     });
     //console.log(accounts);
     return accounts;
+}
+
+function userInstruction(accounts) {
+    let command = readlineSync.question("Enter command:");
+    if (command.toUpperCase() === "LIST ALL") {
+        //console.log(accounts);
+        accounts.forEach(function(account) {account.printNameAndTotal()});
+        console.log("Note negative total is owed")
+    } else if ((command.slice(0,4)).toUpperCase() === "LIST") {
+        let name = command.slice(5);
+        if (accounts.has(name)) {
+            (accounts.get(name)).printTransactions();
+        } else {
+            console.log("Account name not recognised");
+        }
+    } else {console.log("Command not recognised")}
+
 }
 
 
