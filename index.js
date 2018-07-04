@@ -1,9 +1,25 @@
 const readlineSync = require('readline-sync');
 const fs = require('fs');
+const log4js = require('log4js');
+const moment = require('moment');
+
 const Account = require('./accounts.js');
 const Transaction = require('./transactions.js');
 
-fs.readFile("Transactions2014.csv", 'utf8',  function (err, data) {
+log4js.configure({
+    appenders: {
+        file: { type: 'fileSync', filename: 'logs/debug.log' }
+    },
+    categories: {
+        default: { appenders: ['file'], level: 'debug'}
+    }
+});
+
+const logger = log4js.getLogger("index.js");
+
+logger.info("Program has started.")
+
+fs.readFile("DodgyTransactions2015.csv", 'utf8',  function (err, data) {
     const accounts = processData(data);
     userInstruction(accounts);
 });
@@ -14,16 +30,27 @@ function processData(data) {
      rows.shift();
      rows.pop();
 
-     rows.forEach(function (row) {
-         let trans = row.split(",");
-         let transaction = new Transaction(trans);
-         //console.log(transaction);
-         checkAndAddAccount(transaction.from, accounts);
-         checkAndAddAccount(transaction.to, accounts);
-         (accounts.get(transaction.to)).processToTransaction(transaction);
-         (accounts.get(transaction.from)).processFromTransaction(transaction);
+     for (let i = 0; i < rows.length; i++){
+        let row = rows[i];
+        let trans = row.split(",")
 
-    });
+        if (trans.length != 5) {
+            logger.error(`Wrong number of columns in row ${i}: should be 5 columns but there are ${trans.length}.`);
+        }
+        if (isNaN(trans[4])) {
+            logger.error(`Amount in row ${i} is not a number: ${trans[4]}`);
+        }
+        if (!moment(trans[0], "DD-MM-YYYY").isValid()) {
+            logger.error(`Date in row ${i} is not valid: ${trans[0]}`);
+        }
+
+        let transaction = new Transaction(trans);
+        //console.log(transaction);
+        checkAndAddAccount(transaction.from, accounts);
+        checkAndAddAccount(transaction.to, accounts);
+        (accounts.get(transaction.to)).processToTransaction(transaction);
+        (accounts.get(transaction.from)).processFromTransaction(transaction);
+    };
     //console.log(accounts);
     return accounts;
 }
@@ -48,6 +75,6 @@ function userInstruction(accounts) {
 
 function checkAndAddAccount(name, accounts) {
     if (!accounts.has(name)) {
-        accounts.set(name, new Account(name, 0, [], []));
+        accounts.set(name, new Account(name));
     }
 }

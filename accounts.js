@@ -1,9 +1,9 @@
 class Account {
-    constructor(owner, total, transactionsTo, transactionsFrom) {
+    constructor(owner) {
         this.owner = owner;
-        this.total = total;
-        this.transactionsTo = transactionsTo;
-        this.transactionsFrom = transactionsFrom;
+        this.total = 0;
+        this.transactionsTo = [];
+        this.transactionsFrom = [];
     }
 
     processToTransaction(transaction) {
@@ -17,7 +17,7 @@ class Account {
     }
 
     printNameAndTotal(){
-        console.log("Name: " + this.owner);
+        console.log(`Name: ${this.owner}`);
         console.log("Total: " + this.total);
     }
 
