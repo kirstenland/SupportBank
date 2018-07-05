@@ -25,10 +25,11 @@ while (run) {
     } catch (e){
         if (e === "Stop Process") {
             console.log("Goodbye");
+            run = false;
+        } else if (e.message != undefined && e.message.slice(0,20) === "ENOENT: no such file") {
+            console.log("no such file");
         } else {
             console.log(e);
         }
-        run = false;
     }
 }
-
