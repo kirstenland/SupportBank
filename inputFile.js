@@ -25,7 +25,7 @@ function parseInput(filename) {
 
 function parseJSON(filename) {
     const transactions = [];
-    let data = fs.readFileSync(filename, 'utf8')
+    let data = fs.readFileSync(filename, 'utf8');
     const objects = JSON.parse(data);
     objects.forEach(function(obj){
         const date = moment(obj.Date, "YYYY-MM-DD HH:mm:ss");
@@ -54,7 +54,7 @@ function parseXML(filename) {
     const data = fs.readFileSync(filename, 'utf8');
     let transList;
     parseXMLString(data, function(err, result) {
-        transList = result.TransactionList.SupportTransaction
+        transList = result.TransactionList.SupportTransaction;
     });
     transList.forEach(function (obj) {
         const date = moment(getJsDateFromExcel(obj["$"].Date));
