@@ -18,7 +18,7 @@ class Account {
 
     printNameAndTotal(){
         console.log(`Name: ${this.owner}`);
-        console.log("Total: " + (this.total).toFixed(2));
+        console.log("Total: " + (this.total).toFixed(2) + "\n");
     }
 
     printTransactions(){

@@ -5,6 +5,7 @@ const moment = require('moment');
 
 const Account = require('./accounts.js');
 const Transaction = require('./transactions.js');
+const parseInput = require('./inputFile.js');
 
 log4js.configure({
     appenders: {
@@ -19,23 +20,21 @@ const logger = log4js.getLogger("index.js");
 
 logger.info("Program has started.");
 
-fs.readFile("DodgyTransactions2015.csv", 'utf8',  function (err, data) {
-    try {
-        const accounts = processData(data);
-        userInstruction(accounts);
-    } catch (e){
-        if (e === "Stop Process") {
-            console.log("Goodbye");
-        } else {
-            console.log("An unknown error has occured");
-            console.log(e);
-        }
+try {
+    const transactions = parseInput("DodgyTransactions2015.csv");
+    const accounts = processData(transactions);
+    userInstruction(accounts);
+} catch (e){
+    if (e === "Stop Process") {
+        console.log("Goodbye");
+    } else {
+        console.log(e);
     }
-});
+}
 
-function processData(data) {
+function processData(transactions) {
     //removed code which converts data into rows
-     const errors = countErrors(rows);
+     const errors = countErrors(transactions);
 
      if (errors.size !== 0) {
          printErrors(errors);
@@ -44,29 +43,22 @@ function processData(data) {
              throw "Stop Process"
          }
      }
-    return processWithoutErrors(rows, errors);
+    return processWithoutErrors(transactions, errors);
 }
 
-function countErrors(rows) {
+function countErrors(transactions) {
     const errors = new Map();
 
-    for (let i = 0; i < rows.length; i++) {
-        let row = rows[i];
-        let trans = row.split(",")
+    for (let i = 0; i < transactions.length; i++) {
+        const transaction = transactions[i];
         let errorMessage = "";
-
-        if (trans.length != 5) {
-            logger.error(`Wrong number of columns in row ${i}: should be 5 columns but there are ${trans.length}.`);
-            errorMessage += `Wrong number of columns in row ${i}: should be 5 columns but there are ${trans.length}.\n`
-        } else {
-            if (isNaN(trans[4])) {
-                logger.error(`Amount in row ${i} is not a number: ${trans[4]}`);
-                errorMessage += `Amount in row ${i} is not a number: ${trans[4]}\n`;
-            }
-            if (!moment(trans[0], "DD-MM-YYYY").isValid()) {
-                logger.error(`Date in row ${i} is not valid: ${trans[0]}`);
-                errorMessage += `Date in row ${i} is not valid: ${trans[0]}\n`;
-            }
+        if (isNaN(transaction.amount)) {
+            logger.error(`Amount in row ${i} is not a number.`);
+            errorMessage += `Amount in row ${i} is not a number.\n`;
+        }
+        if (!transaction.date.isValid()) {
+            logger.error(`Date in row ${i} is not valid.`);
+            errorMessage += `Date in row ${i} is not valid`;
         }
         if (errorMessage !== "") {
             errors.set(i, errorMessage);
@@ -75,13 +67,11 @@ function countErrors(rows) {
     return errors;
 }
 
-function processWithoutErrors(rows, errors) {
+function processWithoutErrors(transactions, errors) {
     const accounts = new Map();
-    for (let i = 0; i < rows.length; i++) {
+    for (let i = 0; i < transactions.length; i++) {
         if (!errors.has(i)) {
-            let row = rows[i];
-            let trans = row.split(",")
-            let transaction = new Transaction(trans);
+            const transaction = transactions[i];
             checkAndAddAccount(transaction.from, accounts);
             checkAndAddAccount(transaction.to, accounts);
             (accounts.get(transaction.to)).processToTransaction(transaction);
@@ -94,7 +84,7 @@ function processWithoutErrors(rows, errors) {
 function printErrors(errors) {
     errors.forEach(function(error) {
         console.log(error)
-    })
+    });
 }
 
 function userInstruction(accounts) {
