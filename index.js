@@ -21,7 +21,7 @@ const logger = log4js.getLogger("index.js");
 logger.info("Program has started.");
 
 try {
-    const transactions = parseInput("DodgyTransactions2015.csv");
+    const transactions = parseInput("Transactions2013.json");
     const accounts = processData(transactions);
     userInstruction(accounts);
 } catch (e){
