@@ -17,14 +17,18 @@ const logger = log4js.getLogger("index.js");
 
 logger.info("Program has started.");
 
-try {
-    const transactions = parseInput("Transactions2013.json");
-    const accounts = processData(transactions);
-    userInstruction(accounts);
-} catch (e){
-    if (e === "Stop Process") {
-        console.log("Goodbye");
-    } else {
-        console.log(e);
+const accounts = new Map();
+var run = true;
+while (run) {
+    try {
+        run = userInstruction(accounts);
+    } catch (e){
+        if (e === "Stop Process") {
+            console.log("Goodbye");
+        } else {
+            console.log(e);
+        }
+        run = false;
     }
 }
+

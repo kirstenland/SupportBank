@@ -5,7 +5,7 @@ const Account = require("./accounts.js");
 
 const logger = log4js.getLogger("bank.js");
 
-function processData(transactions) {
+function processData(transactions, accounts) {
     const errors = countErrors(transactions);
 
     if (errors.size !== 0) {
@@ -15,7 +15,7 @@ function processData(transactions) {
             throw "Stop Process"
         }
     }
-    return processWithoutErrors(transactions, errors);
+    return processWithoutErrors(transactions, errors, accounts);
 }
 
 function countErrors(transactions) {
@@ -39,8 +39,7 @@ function countErrors(transactions) {
     return errors;
 }
 
-function processWithoutErrors(transactions, errors) {
-    const accounts = new Map();
+function processWithoutErrors(transactions, errors, accounts) {
     for (let i = 0; i < transactions.length; i++) {
         if (!errors.has(i)) {
             const transaction = transactions[i];
