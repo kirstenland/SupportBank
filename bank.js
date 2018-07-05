@@ -7,15 +7,14 @@ const logger = log4js.getLogger("bank.js");
 
 function processData(transactions, accounts) {
     const errors = countErrors(transactions);
-
+    let query = "Y";
     if (errors.size !== 0) {
         printErrors(errors);
-        const query = readlineSync.question("Do you want to continue anyway with the remaining data? (y/N)");
-        if (query.toUpperCase() !== "Y") {
-            throw "Stop Process"
-        }
+        query = readlineSync.question("Do you want to continue anyway with the remaining data? (y/N)");
     }
-    return processWithoutErrors(transactions, errors, accounts);
+    if (query.toUpperCase() === "Y") {
+        processWithoutErrors(transactions, errors, accounts);
+    }
 }
 
 function countErrors(transactions) {
@@ -56,6 +55,7 @@ function printErrors(errors) {
     errors.forEach(function(error) {
         console.log(error)
     });
+    console.log(`There are ${errors.size} rows featuring at least one error`);
 }
 
 function checkAndAddAccount(name, accounts) {
